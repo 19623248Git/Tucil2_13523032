@@ -1,3 +1,5 @@
+# How to run the CLI program
+
 ## Compiling the program
 
 ### Ensure java versions (23.0.2 or above)
@@ -34,14 +36,42 @@ javac -d bin -cp src src/QuadTree/*.java src/Main.java
 java -cp bin Main
 ```
 
+# Class Definitions
+
+## Pixel class definition:
+
+### Attributes:
+``` Java
+private int r;
+private int g;
+private int b;
+```
+
+### Methods:
+```Java
+public int getR(); // Returns 'r' channel value of pixel
+public int getG(); // Returns 'g' channel value of pixel
+public int getB(); // Returns 'b' channel value of pixel
+public void setRGB(int r, int g, int b); // Sets the r, g, and b attributes of Pixel
+```
+
 ## ImageProcessing class definition:
 
 ### Attributes:
-- BufferedImage image
-- int width
-- int height
-- String absPath
+``` Java
+private BufferedImage image;
+private int width;
+private int height;
+private String absPath;
+```
 
 ### Methods:
-- loadImage(String absPath) -> loads image with absolute path parameter
-- inputAbsPath() -> prompts user to input absolute path before loadImage(String absPath)
+```Java
+public void loadImage(String absPath); // Loads image not from constructor
+public void inputAbsPath(); // Method for user input absolute path
+public int getWidth(); // Returns width attribute
+public int getHeight(); // Returns height attribute
+public Boolean isImageEmpty(); // Returns true if image is null
+public Pixel getPixelValue(int x, int y); // Returns a Pixel object at (x,y) coordinate
+public void viewImage(); // Image viewer with JFrame
+```

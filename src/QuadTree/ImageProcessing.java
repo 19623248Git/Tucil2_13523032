@@ -58,18 +58,22 @@ public class ImageProcessing {
 		}
 	}
 
+	// Returns width attribute
 	public int getWidth(){
 		return this.width;
 	}
 
+	// Returns height attribute
 	public int getHeight(){
 		return this.height;
 	}
 
+	// Returns true if image is null
 	public Boolean isImageEmpty(){
 		return this.image == null;
 	}
 
+	// Returns a Pixel object at (x,y) coordinate
 	public Pixel getPixelValue(int x, int y) {
 		if (x < 0 || x >= width || y < 0 || y >= height) {
 			throw new IllegalArgumentException("Coordinates out of bounds.");
@@ -78,7 +82,8 @@ public class ImageProcessing {
 		Color color = new Color(pixel, true); // Extract color components
 		return new Pixel(color.getRed(), color.getGreen(), color.getBlue());
 	}
-
+	
+	// Image viewer with JFrame
 	public void viewImage() {
 		if (isImageEmpty()) {
 			System.out.println("No image loaded.");
