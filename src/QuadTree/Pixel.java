@@ -41,4 +41,18 @@ public class Pixel {
 		this.b = b;
 		this.g = g;
 	}
+
+	// Adds pixel with other pixels
+	public void add(Pixel other){
+		this.r+=other.r;
+		this.b+=other.b;
+		this.g+=other.g;
+	}
+
+	// Mean division of pixel from n pixels
+	public void divMean(double n){
+		this.r/=n;
+		this.b/=n;
+		this.g/=n;
+	}
 }
