@@ -1,6 +1,7 @@
 package QuadTree;
 
 import java.io.IOException;
+import java.util.List;
 
 class QuadTreeImage extends ImageProcessing{
 
@@ -24,6 +25,22 @@ class QuadTreeImage extends ImageProcessing{
         private int mode;
         private int minBlockSize;
         private double compressPercent;
+
+        // Node structure
+        public static class Node{
+
+                // Data attributes
+                private int start_x;
+                private int end_x;
+                private int start_y;
+                private int end_y;
+                private double error;
+
+                // Tree data structure
+                private Node parent;
+                private List<Node> childrens;
+        }
+        
 
         public QuadTreeImage(){
                 super();
