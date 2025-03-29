@@ -60,12 +60,18 @@ class QuadTreeImage extends ImageProcessing{
                 this.mode = 0; // default mode
         }
 
-        public double meanRange(int x_start, int x_end, int y_start, int y_end){
+        
+
+        // Get mean of pixels between x1 - x2 and y1 - y2
+        public double meanPixelRange(int x_start, int x_end, int y_start, int y_end){
+                this.meanPixel.setRGB(0, 0, 0);
+                double n = (x_end - x_start + 1) * (y_end - y_start + 1);
                 for (int i = y_start; i < y_end; i++) {
                         for (int j = x_start; j < x_end; j++){ // (i , j) -> (row, col)
-                                
+                                this.meanPixel.add(getPixelValue(i, j));
                         }
                 }
+                this.meanPixel.divMean(n);
                 return 0;
         }
 
