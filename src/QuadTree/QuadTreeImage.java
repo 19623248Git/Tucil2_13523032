@@ -60,7 +60,93 @@ class QuadTreeImage extends ImageProcessing{
                 this.mode = 0; // default mode
         }
 
-        
+        // Getters
+        public Pixel getMeanPixel() { 
+                return meanPixel; 
+        }
+        public double getVariance() { 
+                return variance; 
+        }
+        public double getVarThres() { 
+                return var_thres; 
+        }
+        public double getMad() { 
+                return mad; 
+        }
+        public double getMadThres() { 
+                return mad_thres; 
+        }
+        public double getMpd() { 
+                return mpd; 
+        }
+        public double getMpdThres() { 
+                return mpd_thres; 
+        }
+        public double getEntropy() { 
+                return entropy; 
+        }
+        public double getEntrThres() { 
+                return entr_thres; 
+        }
+        public double getSsim() { 
+                return ssim; 
+        }
+        public double getSsimThres() { 
+                return ssim_thres; 
+        }
+        public int getMode() { 
+                return mode; 
+        }
+        public int getMinBlockSize() { 
+                return minBlockSize; 
+        }
+        public double getCompressPercent() { 
+                return compressPercent; 
+        }
+
+        // Setters
+        public void setMeanPixel(Pixel meanPixel) { 
+                this.meanPixel = meanPixel; 
+        }
+        public void setVariance(double variance) { 
+                this.variance = variance; 
+        }
+        public void setVarThres(double var_thres) { 
+                this.var_thres = var_thres; 
+        }
+        public void setMad(double mad) { 
+                this.mad = mad; 
+        }
+        public void setMadThres(double mad_thres) { 
+                this.mad_thres = mad_thres; 
+        }
+        public void setMpd(double mpd) { 
+                this.mpd = mpd; 
+        }
+        public void setMpdThres(double mpd_thres) { 
+                this.mpd_thres = mpd_thres; 
+        }
+        public void setEntropy(double entropy) { 
+                this.entropy = entropy; 
+        }
+        public void setEntrThres(double entr_thres) { 
+                this.entr_thres = entr_thres; 
+        }
+        public void setSsim(double ssim) { 
+                this.ssim = ssim; 
+        }
+        public void setSsimThres(double ssim_thres) { 
+                this.ssim_thres = ssim_thres; 
+        }
+        public void setMode(int mode) { 
+                this.mode = mode; 
+        }
+        public void setMinBlockSize(int minBlockSize) { 
+                this.minBlockSize = minBlockSize; 
+        }
+        public void setCompressPercent(double compressPercent) { 
+                this.compressPercent = compressPercent; 
+        }
 
         // Get mean of pixels between x1 - x2 and y1 - y2
         public double meanPixelRange(int x_start, int x_end, int y_start, int y_end){
