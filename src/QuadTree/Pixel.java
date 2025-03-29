@@ -49,6 +49,13 @@ public class Pixel {
 		this.g+=other.g;
 	}
 
+	// Substracts pixel with other pixels
+	public void minus(Pixel other){
+		this.r-=other.r;
+		this.b-=other.b;
+		this.g-=other.g;
+	}
+
 	// Mean division of pixel from n pixels
 	public void divMean(double n){
 		this.r/=n;

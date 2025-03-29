@@ -8,6 +8,7 @@ class QuadTreeImage extends ImageProcessing{
         private Pixel meanPixel;
 
         // Error measurement attributes
+        // Storing the value of RGB not each color channel
         private double variance;
         private double var_thres;
         private double mad;
@@ -149,16 +150,94 @@ class QuadTreeImage extends ImageProcessing{
         }
 
         // Get mean of pixels between x1 - x2 and y1 - y2
-        public double meanPixelRange(int x_start, int x_end, int y_start, int y_end){
+        public void meanPixelRange(int x_start, int x_end, int y_start, int y_end){
                 this.meanPixel.setRGB(0, 0, 0);
                 double n = (x_end - x_start + 1) * (y_end - y_start + 1);
                 for (int i = y_start; i < y_end; i++) {
                         for (int j = x_start; j < x_end; j++){ // (i , j) -> (row, col)
-                                this.meanPixel.add(getPixelValue(i, j));
+                                this.meanPixel.add(getPixelValue(j, i));
                         }
                 }
                 this.meanPixel.divMean(n);
-                return 0;
+        }
+
+        public void calcVariance(int x_start, int x_end, int y_start, int y_end){
+                double var_r = 0;
+                double var_g = 0;
+                double var_b = 0;
+                double n = (x_end - x_start + 1) * (y_end - y_start + 1);
+                meanPixelRange(x_start, x_end, y_start, y_end);
+                for(int i = y_start; i < y_end; i++){
+                        for(int j = x_start; j < x_end; j++){ // (i , j) -> (row, col)
+                                var_r+=Math.pow(getPixelValue(j, i).getR()-this.meanPixel.getR(), 2);
+                                var_g+=Math.pow(getPixelValue(j, i).getG()-this.meanPixel.getG(), 2);
+                                var_b+=Math.pow(getPixelValue(j, i).getB()-this.meanPixel.getB(), 2);
+                        }
+                }
+                var_r/=n;
+                var_g/=n;
+                var_b/=n;
+                this.variance = (var_r + var_g + var_b) / 3;
+        }
+
+        public void calcMad(int x_start, int x_end, int y_start, int y_end) {
+                double mad_r = 0;
+                double mad_g = 0;
+                double mad_b = 0;
+                double n = (x_end - x_start + 1) * (y_end - y_start + 1);
+                meanPixelRange(x_start, x_end, y_start, y_end);
+                for (int i = y_start; i < y_end; i++) {
+                        for (int j = x_start; j < x_end; j++) { // (i , j) -> (row, col)
+                                mad_r += Math.abs(getPixelValue(j, i).getR() - this.meanPixel.getR());
+                                mad_g += Math.abs(getPixelValue(j, i).getG() - this.meanPixel.getG());
+                                mad_b += Math.abs(getPixelValue(j, i).getB() - this.meanPixel.getB());
+                        }
+                }
+                
+                mad_r /= n;
+                mad_g /= n;
+                mad_b /= n;
+                this.mad = (mad_r + mad_g + mad_b) / 3;
+        }
+        
+        public void calcMpd(int x_start, int x_end, int y_start, int y_end){
+                double max_r = 0;
+                double max_g = 0;
+                double max_b = 0;
+                for (int i = y_start; i < y_end; i++) {
+                        for (int j = x_start; j < x_end; j++) { // (i , j) -> (row, col)
+                                if(max_r < getPixelValue(j, i).getR()){
+                                        max_r = getPixelValue(j, i).getR();
+                                }
+                                if(max_g < getPixelValue(j, i).getG()){
+                                        max_g = getPixelValue(j, i).getG();
+                                }
+                                if(max_b < getPixelValue(j, i).getB()){
+                                        max_b = getPixelValue(j, i).getB();
+                                }
+                        }
+                }
+                this.mpd = (max_r + max_g + max_b) / 3;
+        }
+
+        public void calcEntropy(int x_start, int x_end, int y_start, int y_end){
+                double entr_r = 0;
+                double entr_g = 0;
+                double entr_b = 0;
+                for (int i = y_start; i < y_end; i++) {
+                        for (int j = x_start; j < x_end; j++) { // (i , j) -> (row, col)
+                                if(entr_r == 0){entr_r = 0;}
+                                if(entr_g == 0){entr_g = 0;}
+                                if(entr_b == 0){entr_b = 0;}
+                                entr_r += (getPixelValue(j, i).getR() * Math.log(getPixelValue(j, i).getR())/Math.log(2));
+                                entr_b += (getPixelValue(j, i).getB() * Math.log(getPixelValue(j, i).getB())/Math.log(2));
+                                entr_g += (getPixelValue(j, i).getG() * Math.log(getPixelValue(j, i).getG())/Math.log(2));
+                        }
+                }
+                entr_r*=-1;
+                entr_b*=-1;
+                entr_g*=-1;
+                this.entropy = (entr_r + entr_g + entr_b) / 3;
         }
 
 }
