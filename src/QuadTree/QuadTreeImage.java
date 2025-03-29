@@ -1,7 +1,6 @@
 package QuadTree;
 
 import java.io.IOException;
-import java.util.List;
 
 class QuadTreeImage extends ImageProcessing{
 
@@ -37,8 +36,8 @@ class QuadTreeImage extends ImageProcessing{
                 private double error;
 
                 // Tree data structure
-                private Node parent;
-                private List<Node> childrens;
+                // private Node parent; // maybe a quad tree doesn't need a parent node, let's remove it now
+                private Node ne, se, sw, nw; // instead of list of childrens, determine 4 childrens
         }
         
 
