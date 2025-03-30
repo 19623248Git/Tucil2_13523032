@@ -43,6 +43,7 @@ class QuadTreeImage extends ImageProcessing{
                         }
                         this.meanPixel.divMean(n);
                 }
+
         }
         
 
@@ -120,6 +121,24 @@ class QuadTreeImage extends ImageProcessing{
         }
         public void setCompressPercent(double compressPercent) { 
                 this.compressPercent = compressPercent; 
+        }
+
+        public double computeError(Node node){
+                switch (this.mode){
+                        case 0:
+                                node.meanPixelRange(); 
+                                return calcVariance(node.start_x, node.end_x, node.start_y, node.end_y, node.meanPixel); 
+
+                        case 1:
+                                node.meanPixelRange();
+                                return calcMad(node.start_x, node.end_x, node.start_y, node.end_y, node.meanPixel);
+
+                        case 2: return calcMpd(node.start_x, node.end_x, node.start_y, node.end_y);
+
+                        case 3: return calcEntropy(node.start_x, node.end_x, node.start_y, node.end_y);
+                        
+                        default: throw new IllegalArgumentException("Invalid mode");
+                }   
         }
 
         public double calcVariance(int x_start, int x_end, int y_start, int y_end, Pixel meanPixel){
