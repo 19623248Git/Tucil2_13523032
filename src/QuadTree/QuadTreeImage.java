@@ -32,17 +32,13 @@ class QuadTreeImage extends ImageProcessing{
                 // private Node parent; // maybe a quad tree doesn't need a parent node, let's remove it now
                 private Node ne, se, sw, nw; // instead of list of childrens, determine 4 childrens
 
-                // Get mean of pixels between x1 - x2 and y1 - y2
-                public void meanPixelRange(){
-                        this.meanPixel.setRGB(0, 0, 0);
-                        double n = (this.end_x - this.start_x + 1) * (this.end_y - this.start_y + 1);
-                        for (int i = this.start_y; i <= this.end_y; i++) {
-                                for (int j = this.start_x; j <= this.end_x; j++){ // (i , j) -> (row, col)
-                                        this.meanPixel.add(getPixelValue(j, i));
-                                }
-                        }
-                        this.meanPixel.divMean(n);
+                public Node(){
+                        this.start_x = 0;
+                        this.end_x = getWidth();
+                        this.start_y = 0;
+                        this.end_y = getHeight();
                 }
+
 
         }
         
@@ -123,14 +119,27 @@ class QuadTreeImage extends ImageProcessing{
                 this.compressPercent = compressPercent; 
         }
 
+        // Get mean of pixels between x1 - x2 and y1 - y2
+        public Pixel meanPixelRange(int start_x, int end_x, int start_y, int end_y){
+                Pixel meanPixel = new Pixel(0,0,0);
+                double n = (end_x - start_x + 1) * (end_y - start_y + 1);
+                for (int i = start_y; i <= end_y; i++) {
+                        for (int j = start_x; j <= end_x; j++){ // (i , j) -> (row, col)
+                                meanPixel.add(getPixelValue(j, i));
+                        }
+                }
+                meanPixel.divMean(n);
+                return meanPixel;
+        }
+
         public double computeError(Node node){
                 return switch (this.mode) {
                         case 0 -> {
-                                node.meanPixelRange();
+                                node.meanPixel = meanPixelRange(node.start_x, node.end_x, node.start_y, node.end_y);
                                 yield calcVariance(node.start_x, node.end_x, node.start_y, node.end_y, node.meanPixel);
                         }
                         case 1 -> {
-                                node.meanPixelRange();
+                                node.meanPixel = meanPixelRange(node.start_x, node.end_x, node.start_y, node.end_y);
                                 yield calcMad(node.start_x, node.end_x, node.start_y, node.end_y, node.meanPixel);
                         }
                         case 2 -> calcMpd(node.start_x, node.end_x, node.start_y, node.end_y);
