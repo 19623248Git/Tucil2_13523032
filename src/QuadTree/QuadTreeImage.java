@@ -124,21 +124,19 @@ class QuadTreeImage extends ImageProcessing{
         }
 
         public double computeError(Node node){
-                switch (this.mode){
-                        case 0:
-                                node.meanPixelRange(); 
-                                return calcVariance(node.start_x, node.end_x, node.start_y, node.end_y, node.meanPixel); 
-
-                        case 1:
+                return switch (this.mode) {
+                        case 0 -> {
                                 node.meanPixelRange();
-                                return calcMad(node.start_x, node.end_x, node.start_y, node.end_y, node.meanPixel);
-
-                        case 2: return calcMpd(node.start_x, node.end_x, node.start_y, node.end_y);
-
-                        case 3: return calcEntropy(node.start_x, node.end_x, node.start_y, node.end_y);
-                        
-                        default: throw new IllegalArgumentException("Invalid mode");
-                }   
+                                yield calcVariance(node.start_x, node.end_x, node.start_y, node.end_y, node.meanPixel);
+                        }
+                        case 1 -> {
+                                node.meanPixelRange();
+                                yield calcMad(node.start_x, node.end_x, node.start_y, node.end_y, node.meanPixel);
+                        }
+                        case 2 -> calcMpd(node.start_x, node.end_x, node.start_y, node.end_y);
+                        case 3 -> calcEntropy(node.start_x, node.end_x, node.start_y, node.end_y);
+                        default -> throw new IllegalArgumentException("Invalid mode: " + this.mode);
+                }; 
         }
 
         public double calcVariance(int x_start, int x_end, int y_start, int y_end, Pixel meanPixel){
