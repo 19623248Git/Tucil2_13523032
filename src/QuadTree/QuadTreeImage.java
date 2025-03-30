@@ -8,7 +8,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 
-class QuadTreeImage extends ImageProcessing{
+public class QuadTreeImage extends ImageProcessing{
 
         // Error measurement attributes
         // Storing the threshold value of RGB not each color channel
@@ -130,7 +130,7 @@ class QuadTreeImage extends ImageProcessing{
 
                 // Divide and Conquer
                 public void DnC(){
-                        computeError(this);
+                        this.error = computeError(this);
                         if(!errorThresholdCheck(this) && !(this.size <= getMinBlockSize())){
                                 int start_dividedX = (this.end_x - this.start_x + 1)/2;
                                 int start_dividedY = (this.end_y - this.start_y + 1)/2;
@@ -341,38 +341,43 @@ class QuadTreeImage extends ImageProcessing{
                 return (mpdR + mpdG + mpdB) / 3.0;
         }
 
-        public double calcEntropy(int x_start, int x_end, int y_start, int y_end){
-                double entr_r = 0;
-                double entr_g = 0;
-                double entr_b = 0;
-                for (int i = y_start; i <= y_end; i++) {
-                        for (int j = x_start; j <= x_end; j++) { // (i , j) -> (row, col)
-                                if(entr_r == 0){
-                                        entr_r = 0;
-                                }
-                                else{
-                                        entr_r += (getPixelValue(j, i).getR() * Math.log(getPixelValue(j, i).getR())/Math.log(2));
-                                }
-
-                                if(entr_g == 0){
-                                        entr_g = 0;
-                                }
-                                else{
-                                        entr_g += (getPixelValue(j, i).getG() * Math.log(getPixelValue(j, i).getG())/Math.log(2));
-                                }
-
-                                if(entr_b == 0){
-                                        entr_b = 0;
-                                }
-                                else{
-                                        entr_b += (getPixelValue(j, i).getB() * Math.log(getPixelValue(j, i).getB())/Math.log(2));
-                                }
+        public double calcEntropy(int x_start, int x_end, int y_start, int y_end) {
+                // create histogram for each color channel
+                int[] histR = new int[256];
+                int[] histG = new int[256];
+                int[] histB = new int[256];
+                
+                int blockWidth = x_end - x_start + 1;
+                int blockHeight = y_end - y_start + 1;
+                int totalPixels = blockWidth * blockHeight;
+                
+                // Build histograms
+                for (int y = y_start; y <= y_end; y++) {
+                        for (int x = x_start; x <= x_end; x++) {
+                                Pixel p = getPixelValue(x, y);
+                                histR[(int) p.getR()]++;
+                                histG[(int) p.getG()]++;
+                                histB[(int) p.getB()]++;
                         }
                 }
-                entr_r*=-1;
-                entr_b*=-1;
-                entr_g*=-1;
-                return ((entr_r + entr_g + entr_b) / 3);
+                
+                // Calculate entropy for each channel
+                double entropyR = calculateChannelEntropy(histR, totalPixels);
+                double entropyG = calculateChannelEntropy(histG, totalPixels);
+                double entropyB = calculateChannelEntropy(histB, totalPixels);
+                
+                return (entropyR + entropyG + entropyB) / 3.0;
+        }
+            
+        private double calculateChannelEntropy(int[] histogram, int totalPixels) {
+                double entropy = 0.0;
+                for (int i = 0; i < 256; i++) {
+                        if (histogram[i] > 0) {
+                                double probability = (double) histogram[i] / totalPixels;
+                                entropy -= probability * (Math.log(probability) / Math.log(2));
+                        }
+                }
+                return entropy;
         }
 
         public void reconstructImage(){
