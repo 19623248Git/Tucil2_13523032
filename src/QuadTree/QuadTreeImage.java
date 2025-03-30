@@ -153,11 +153,11 @@ class QuadTreeImage extends ImageProcessing{
 
         public QuadTreeImage(){
                 super();
-                this.var_thres = 0;
-                this.mad_thres = 0;
-                this.mpd_thres = 0;
-                this.entr_thres = 0;
-                this.ssim_thres = 0;
+                this.var_thres = 200; // 150 - 250
+                this.mad_thres = 15; // 8 - 15
+                this.mpd_thres = 60; // 40 - 60
+                this.entr_thres = 3; // 2 - 3
+                this.ssim_thres = 0.92; // 0.85 - 0.92
                 this.minBlockSize = 4;
                 this.compressPercent = 0;
                 this.mode = 0; // default mode
@@ -172,15 +172,21 @@ class QuadTreeImage extends ImageProcessing{
 
         public QuadTreeImage(String absPath) throws IOException{
                 super(absPath);
-                this.var_thres = 0;
-                this.mad_thres = 0;
-                this.mpd_thres = 0;
-                this.entr_thres = 0;
-                this.ssim_thres = 0;
+                this.var_thres = 200; // 150 - 250
+                this.mad_thres = 15; // 8 - 15
+                this.mpd_thres = 60; // 40 - 60
+                this.entr_thres = 3; // 2 - 3
+                this.ssim_thres = 0.92; // 0.85 - 0.92
                 this.minBlockSize = 4;
                 this.compressPercent = 0;
                 this.mode = 0; // default mode
                 this.root = new Node();
+                this.img_output = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
+                for (int y = 0; y < getHeight(); y++) {
+                        for (int x = 0; x < getWidth(); x++) {
+                                img_output.setRGB(x, y, new Color(255, 255, 255).getRGB());
+                        }
+                }\
         }
 
         // Getters
