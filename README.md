@@ -53,6 +53,9 @@ public int getR(); // Returns 'r' channel value of pixel
 public int getG(); // Returns 'g' channel value of pixel
 public int getB(); // Returns 'b' channel value of pixel
 public void setRGB(int r, int g, int b); // Sets the r, g, and b attributes of Pixel
+public void add(Pixel other); // Adds pixel with other pixels
+public void minus(Pixel other) // Substracts pixel with other pixels
+public void divMean(double n) // Mean division of pixel from n pixels
 ```
 
 ## ImageProcessing class definition:
