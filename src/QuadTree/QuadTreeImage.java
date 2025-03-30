@@ -1,6 +1,12 @@
 package QuadTree;
 
+import java.awt.Color;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JScrollPane;
 
 class QuadTreeImage extends ImageProcessing{
 
@@ -17,6 +23,9 @@ class QuadTreeImage extends ImageProcessing{
         private int minBlockSize;
         private double compressPercent;
         private Node root;
+
+        // Output image
+        private BufferedImage img_output;
 
         // Node structure
         public class Node{
@@ -153,6 +162,12 @@ class QuadTreeImage extends ImageProcessing{
                 this.compressPercent = 0;
                 this.mode = 0; // default mode
                 this.root = new Node();
+                this.img_output = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
+                for (int y = 0; y < getHeight(); y++) {
+                        for (int x = 0; x < getWidth(); x++) {
+                                img_output.setRGB(x, y, new Color(255, 255, 255).getRGB());
+                        }
+                }
         }
 
         public QuadTreeImage(String absPath) throws IOException{
@@ -292,24 +307,32 @@ class QuadTreeImage extends ImageProcessing{
                 return ((mad_r + mad_g + mad_b) / 3);
         }
         
-        public double calcMpd(int x_start, int x_end, int y_start, int y_end){
-                double max_r = 0;
-                double max_g = 0;
-                double max_b = 0;
-                for (int i = y_start; i <= y_end; i++) {
-                        for (int j = x_start; j <= x_end; j++) { // (i , j) -> (row, col)
-                                if(max_r < getPixelValue(j, i).getR()){
-                                        max_r = getPixelValue(j, i).getR();
-                                }
-                                if(max_g < getPixelValue(j, i).getG()){
-                                        max_g = getPixelValue(j, i).getG();
-                                }
-                                if(max_b < getPixelValue(j, i).getB()){
-                                        max_b = getPixelValue(j, i).getB();
-                                }
+        public double calcMpd(int x_start, int x_end, int y_start, int y_end) {
+                int minR = 255, maxR = 0;
+                int minG = 255, maxG = 0;
+                int minB = 255, maxB = 0;
+        
+                for (int y = y_start; y <= y_end; y++) {
+                        for (int x = x_start; x <= x_end; x++) {
+                                Pixel p = getPixelValue(x, y);
+                                int r = (int) p.getR();
+                                int g = (int) p.getG();
+                                int b = (int) p.getB();
+                
+                                minR = Math.min(minR, r);
+                                maxR = Math.max(maxR, r);
+                                minG = Math.min(minG, g);
+                                maxG = Math.max(maxG, g);
+                                minB = Math.min(minB, b);
+                                maxB = Math.max(maxB, b);
                         }
                 }
-                return ((max_r + max_g + max_b) / 3);
+        
+                double mpdR = maxR - minR;
+                double mpdG = maxG - minG;
+                double mpdB = maxB - minB;
+        
+                return (mpdR + mpdG + mpdB) / 3.0;
         }
 
         public double calcEntropy(int x_start, int x_end, int y_start, int y_end){
@@ -318,12 +341,26 @@ class QuadTreeImage extends ImageProcessing{
                 double entr_b = 0;
                 for (int i = y_start; i <= y_end; i++) {
                         for (int j = x_start; j <= x_end; j++) { // (i , j) -> (row, col)
-                                if(entr_r == 0){entr_r = 0;}
-                                if(entr_g == 0){entr_g = 0;}
-                                if(entr_b == 0){entr_b = 0;}
-                                entr_r += (getPixelValue(j, i).getR() * Math.log(getPixelValue(j, i).getR())/Math.log(2));
-                                entr_b += (getPixelValue(j, i).getB() * Math.log(getPixelValue(j, i).getB())/Math.log(2));
-                                entr_g += (getPixelValue(j, i).getG() * Math.log(getPixelValue(j, i).getG())/Math.log(2));
+                                if(entr_r == 0){
+                                        entr_r = 0;
+                                }
+                                else{
+                                        entr_r += (getPixelValue(j, i).getR() * Math.log(getPixelValue(j, i).getR())/Math.log(2));
+                                }
+
+                                if(entr_g == 0){
+                                        entr_g = 0;
+                                }
+                                else{
+                                        entr_g += (getPixelValue(j, i).getG() * Math.log(getPixelValue(j, i).getG())/Math.log(2));
+                                }
+
+                                if(entr_b == 0){
+                                        entr_b = 0;
+                                }
+                                else{
+                                        entr_b += (getPixelValue(j, i).getB() * Math.log(getPixelValue(j, i).getB())/Math.log(2));
+                                }
                         }
                 }
                 entr_r*=-1;
@@ -332,8 +369,52 @@ class QuadTreeImage extends ImageProcessing{
                 return ((entr_r + entr_g + entr_b) / 3);
         }
 
+        public void reconstructImage(){
+                reconstructFromNode(root);
+        }
+
+        public void reconstructFromNode(Node node){
+                if (node.isLeaf()) {
+                        // Fill the region with the mean pixel
+                        for (int y = node.start_y; y <= node.end_y; y++) {
+                            for (int x = node.start_x; x <= node.end_x; x++) {
+                                int r = (int) node.meanPixel.getR();
+                                int g = (int) node.meanPixel.getG();
+                                int b = (int) node.meanPixel.getB();
+                                Color color = new Color(r, g, b);
+                                // update output image;
+                                img_output.setRGB(x, y, color.getRGB());
+                            }
+                        }
+                } else {
+                        reconstructFromNode(node.ne);
+                        reconstructFromNode(node.se);
+                        reconstructFromNode(node.sw);
+                        reconstructFromNode(node.nw);
+                }
+        }
+
         public void compress(){
                 root.DnC();
         }
 
+        public void applyCompression(){
+                compress();
+                reconstructImage();
+        }
+
+        public void viewCompressedImage() {
+                if (img_output == null) {
+                        System.out.println("No compressed image available.");
+                        return;
+                }
+
+                JFrame frame = new JFrame("Compressed Image");
+                frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                JLabel label = new JLabel(new ImageIcon(img_output));
+                frame.add(new JScrollPane(label));
+                frame.pack();
+                frame.setLocationRelativeTo(null);
+                frame.setVisible(true);
+        }
 }
