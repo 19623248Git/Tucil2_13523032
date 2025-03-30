@@ -20,6 +20,11 @@ public class Pixel {
 		this.b = b;
 	}
 
+	// Copy constructor
+	public Pixel(Pixel other){
+		this(other.r,other.g,other.b);
+	}
+
 	// Returns 'r' channel value of pixel
 	public int getR(){
 		return this.r;
