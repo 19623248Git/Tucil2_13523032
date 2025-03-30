@@ -186,7 +186,7 @@ class QuadTreeImage extends ImageProcessing{
                         for (int x = 0; x < getWidth(); x++) {
                                 img_output.setRGB(x, y, new Color(255, 255, 255).getRGB());
                         }
-                }\
+                }
         }
 
         // Getters
