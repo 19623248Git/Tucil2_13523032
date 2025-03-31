@@ -3,6 +3,8 @@ package QuadTree;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -130,35 +132,55 @@ public class QuadTreeImage extends ImageProcessing{
 
                 // Divide and Conquer
                 public void DnC(){
+                        
                         this.error = computeError(this);
-                        if(!errorThresholdCheck(this) && !(this.size <= getMinBlockSize())){
-                                int start_dividedX = (this.end_x - this.start_x + 1)/2;
-                                int start_dividedY = (this.end_y - this.start_y + 1)/2;
-                                this.ne = new Node(start_dividedX, this.end_x, this.start_y ,start_dividedY-1);
-                                this.se = new Node(start_dividedX, this.end_x, start_dividedY, this.end_y);
-                                this.sw = new Node(this.start_x, start_dividedX-1, start_dividedY, this.end_y);
-                                this.nw = new Node(this.start_x, start_dividedX-1, this.start_y ,start_dividedY-1);
+
+                        // base case
+                        if(this.size <= getMinBlockSize()) return;
+
+                        if(!errorThresholdCheck(this)){
+                                System.out.println("The current block size: " + this.size + " With start_x: " + this.start_x + " end_x: " + this.end_x + " start_y: " + this.start_y + " end_y: " + this.end_y);
+                                int midX = (this.end_x + this.start_x)/2;
+                                int midY = (this.end_y + this.start_y)/2;
+                                this.ne = new Node(midX, this.end_x, this.start_y ,midY);
+                                this.se = new Node(midX, this.end_x, midY, this.end_y);
+                                this.sw = new Node(this.start_x, midX, midY, this.end_y);
+                                this.nw = new Node(this.start_x, midX, this.start_y ,midY);
                                 ne.DnC();
                                 se.DnC();
                                 sw.DnC();
                                 nw.DnC();
                         }
-                        else{
-                                // do nothing
-                        }
                 }
+        }
 
+        // Inside QuadTreeImage class
+        public List<Node> getAllNodes() {
+                List<Node> nodes = new ArrayList<>();
+                traverseNodes(root, nodes);
+                return nodes;
+        }
+
+        private void traverseNodes(Node node, List<Node> nodes) {
+                if (node == null) return;
+                        nodes.add(node);
+                if (!node.isLeaf()) {
+                        traverseNodes(node.ne, nodes);
+                        traverseNodes(node.se, nodes);
+                        traverseNodes(node.sw, nodes);
+                        traverseNodes(node.nw, nodes);
+                }
         }
         
 
         public QuadTreeImage(){
                 super();
-                this.var_thres = 200; // 150 - 250
+                this.var_thres = 150; // 150 - 250
                 this.mad_thres = 15; // 8 - 15
                 this.mpd_thres = 60; // 40 - 60
                 this.entr_thres = 3; // 2 - 3
                 this.ssim_thres = 0.92; // 0.85 - 0.92
-                this.minBlockSize = 4;
+                this.minBlockSize = 16;
                 this.compressPercent = 0;
                 this.mode = 0; // default mode
                 this.root = new Node();
@@ -172,12 +194,12 @@ public class QuadTreeImage extends ImageProcessing{
 
         public QuadTreeImage(String absPath) throws IOException{
                 super(absPath);
-                this.var_thres = 200; // 150 - 250
+                this.var_thres = 150; // 150 - 250
                 this.mad_thres = 15; // 8 - 15
                 this.mpd_thres = 60; // 40 - 60
                 this.entr_thres = 3; // 2 - 3
                 this.ssim_thres = 0.92; // 0.85 - 0.92
-                this.minBlockSize = 4;
+                this.minBlockSize = 16;
                 this.compressPercent = 0;
                 this.mode = 0; // default mode
                 this.root = new Node();
