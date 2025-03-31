@@ -139,7 +139,8 @@ public class QuadTreeImage extends ImageProcessing{
                         if(this.size <= getMinBlockSize()) return;
 
                         if(!errorThresholdCheck(this)){
-                                System.out.println("The current block size: " + this.size + " With start_x: " + this.start_x + " end_x: " + this.end_x + " start_y: " + this.start_y + " end_y: " + this.end_y);
+                                // Useful debugging printer
+                                // System.out.println("The current block size: " + this.size + " With start_x: " + this.start_x + " end_x: " + this.end_x + " start_y: " + this.start_y + " end_y: " + this.end_y);
                                 int midX = (this.end_x + this.start_x)/2;
                                 int midY = (this.end_y + this.start_y)/2;
                                 this.ne = new Node(midX, this.end_x, this.start_y ,midY);
