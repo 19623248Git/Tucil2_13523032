@@ -25,6 +25,7 @@ public class QuadTreeImage extends ImageProcessing{
         private int minBlockSize;
         private double compressPercent;
         private Node root;
+        private double elapsedTime;
 
         // Output image
         private BufferedImage img_output;
@@ -155,25 +156,8 @@ public class QuadTreeImage extends ImageProcessing{
                 }
         }
 
-        // Inside QuadTreeImage class
-        public List<Node> getAllNodes() {
-                List<Node> nodes = new ArrayList<>();
-                traverseNodes(root, nodes);
-                return nodes;
-        }
-
-        private void traverseNodes(Node node, List<Node> nodes) {
-                if (node == null) return;
-                        nodes.add(node);
-                if (!node.isLeaf()) {
-                        traverseNodes(node.ne, nodes);
-                        traverseNodes(node.se, nodes);
-                        traverseNodes(node.sw, nodes);
-                        traverseNodes(node.nw, nodes);
-                }
-        }
         
-
+        
         public QuadTreeImage(){
                 super();
                 this.var_thres = 150; // 150 - 250
@@ -184,6 +168,7 @@ public class QuadTreeImage extends ImageProcessing{
                 this.minBlockSize = 16;
                 this.compressPercent = 0;
                 this.mode = 0; // default mode
+                this.elapsedTime = 0;
                 this.root = new Node();
                 this.img_output = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
                 for (int y = 0; y < getHeight(); y++) {
@@ -203,6 +188,7 @@ public class QuadTreeImage extends ImageProcessing{
                 this.minBlockSize = 16;
                 this.compressPercent = 0;
                 this.mode = 0; // default mode
+                this.elapsedTime = 0;
                 this.root = new Node();
                 this.img_output = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
                 for (int y = 0; y < getHeight(); y++) {
@@ -237,6 +223,9 @@ public class QuadTreeImage extends ImageProcessing{
         public double getCompressPercent() { 
                 return compressPercent; 
         }
+        public double getElapsedTime(){
+                return this.elapsedTime;
+        }
 
         // Setters
         public void setVarThres(double var_thres) { 
@@ -262,6 +251,9 @@ public class QuadTreeImage extends ImageProcessing{
         }
         public void setCompressPercent(double compressPercent) { 
                 this.compressPercent = compressPercent; 
+        }
+        public void setElapsedTime(double elapsedTime){
+                this.elapsedTime = elapsedTime;
         }
 
         // Get mean of pixels between x1 - x2 and y1 - y2
@@ -428,12 +420,34 @@ public class QuadTreeImage extends ImageProcessing{
                 }
         }
 
+        // Debugging methods to traverse through nodes
+        public List<Node> getAllNodes() {
+                List<Node> nodes = new ArrayList<>();
+                traverseNodes(root, nodes);
+                return nodes;
+        }
+
+        private void traverseNodes(Node node, List<Node> nodes) {
+                if (node == null) return;
+                        nodes.add(node);
+                if (!node.isLeaf()) {
+                        traverseNodes(node.ne, nodes);
+                        traverseNodes(node.se, nodes);
+                        traverseNodes(node.sw, nodes);
+                        traverseNodes(node.nw, nodes);
+                }
+        }
+
         public void compress(){
                 root.DnC();
         }
 
         public void applyCompression(){
+                double start = System.nanoTime();
                 compress();
+                double finish = System.nanoTime();
+                this.elapsedTime = (finish - start)/1_000_000_000;
+                System.out.println("Compression Elapsed Time: " + this.elapsedTime + " seconds");
                 reconstructImage();
         }
 
