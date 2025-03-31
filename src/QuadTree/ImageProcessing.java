@@ -18,6 +18,7 @@ public class ImageProcessing {
 	private int height;
 	private String absPath;
 	private String extension;
+	private double fileSize;
 
 	// Default constructor
 	public ImageProcessing() {
@@ -26,6 +27,7 @@ public class ImageProcessing {
 		this.width = 0;
 		this.height = 0;
 		this.extension = " ";
+		this.fileSize = 0;
 	}
 
 	// User-defined constructor with absPath
@@ -35,6 +37,7 @@ public class ImageProcessing {
 		this.width = this.image.getWidth();
 		this.height = this.image.getHeight();
 		this.extension = getFileExtension(absPath);
+		this.fileSize = new File(absPath).length();
 	}
 
 	// Loads image not from constructor
@@ -44,6 +47,7 @@ public class ImageProcessing {
 		this.width = this.image.getWidth();
 		this.height = this.image.getHeight();
 		this.extension = getFileExtension(absPath);
+		this.fileSize = new File(absPath).length();
 	}
 
 	// Method for user input absolute path
@@ -80,6 +84,11 @@ public class ImageProcessing {
 	// Returns image buffer
 	public BufferedImage getImage(){
 		return this.image;
+	}
+
+	// Returns image file size
+	public double getFileSize(){
+		return this.fileSize;
 	}
 
 	// Returns true if image is null

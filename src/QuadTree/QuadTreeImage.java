@@ -32,6 +32,7 @@ public class QuadTreeImage extends ImageProcessing{
         // Output image
         private BufferedImage img_output;
         private String out_path;
+        private double compressedSize;
 
         // Node structure
         public class Node{
@@ -175,6 +176,7 @@ public class QuadTreeImage extends ImageProcessing{
                 this.root = new Node();
                 this.out_path = "compressed";
                 this.img_output = getImage();
+                this.compressedSize = 0;
         }
 
         public QuadTreeImage(String absPath) throws IOException{
@@ -191,6 +193,7 @@ public class QuadTreeImage extends ImageProcessing{
                 this.root = new Node();
                 this.out_path = "compressed";
                 this.img_output = getImage();
+                this.compressedSize = 0;
         }
 
         // Getters
@@ -396,6 +399,11 @@ public class QuadTreeImage extends ImageProcessing{
                 this.out_path += "." + extension;
                 try {
                         File outputFile = new File(this.out_path);
+                        this.compressedSize = outputFile.length();
+                        this.compressPercent = 100 - ((this.compressedSize / getFileSize()) * 100); // this is in percentage
+                        System.out.println("The original size: " + getFileSize() + " bytes");
+                        System.out.println("The compressed size: " + this.compressedSize + " bytes");
+                        System.out.println("The compression percentage: " + this.compressPercent + "%");
                         ImageIO.write(this.img_output, extension, outputFile);
                 }
                 catch(IOException e){
