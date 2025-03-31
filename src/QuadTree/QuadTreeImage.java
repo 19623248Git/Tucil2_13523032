@@ -164,10 +164,10 @@ public class QuadTreeImage extends ImageProcessing{
         
         public QuadTreeImage(){
                 super();
-                this.var_thres = 150; // 150 - 250
-                this.mad_thres = 15; // 8 - 15
-                this.mpd_thres = 60; // 40 - 60
-                this.entr_thres = 3; // 2 - 3
+                this.var_thres = 44;
+                this.mad_thres = 5;
+                this.mpd_thres = 35;
+                this.entr_thres = 2;
                 this.ssim_thres = 0.92; // 0.85 - 0.92
                 this.minBlockSize = 16;
                 this.compressPercent = 0;
@@ -181,10 +181,10 @@ public class QuadTreeImage extends ImageProcessing{
 
         public QuadTreeImage(String absPath) throws IOException{
                 super(absPath);
-                this.var_thres = 150; // 150 - 250
-                this.mad_thres = 15; // 8 - 15
-                this.mpd_thres = 60; // 40 - 60
-                this.entr_thres = 3; // 2 - 3
+                this.var_thres = 44;
+                this.mad_thres = 5;
+                this.mpd_thres = 35;
+                this.entr_thres = 2;
                 this.ssim_thres = 0.92; // 0.85 - 0.92
                 this.minBlockSize = 16;
                 this.compressPercent = 0;
@@ -225,6 +225,10 @@ public class QuadTreeImage extends ImageProcessing{
                 return this.elapsedTime;
         }
 
+        public String getOutPath(){
+                return this.out_path;
+        }
+
         // Setters
         public void setVarThres(double var_thres) { 
                 this.var_thres = var_thres; 
@@ -252,6 +256,10 @@ public class QuadTreeImage extends ImageProcessing{
         }
         public void setElapsedTime(double elapsedTime){
                 this.elapsedTime = elapsedTime;
+        }
+
+        public void setOutPath(String out_path){
+                this.out_path = out_path;
         }
 
         // Get mean of pixels between x1 - x2 and y1 - y2
@@ -399,12 +407,12 @@ public class QuadTreeImage extends ImageProcessing{
                 this.out_path += "." + extension;
                 try {
                         File outputFile = new File(this.out_path);
+                        ImageIO.write(this.img_output, extension, outputFile);
                         this.compressedSize = outputFile.length();
                         this.compressPercent = 100 - ((this.compressedSize / getFileSize()) * 100); // this is in percentage
                         System.out.println("The original size: " + getFileSize() + " bytes");
                         System.out.println("The compressed size: " + this.compressedSize + " bytes");
                         System.out.println("The compression percentage: " + this.compressPercent + "%");
-                        ImageIO.write(this.img_output, extension, outputFile);
                 }
                 catch(IOException e){
                         System.out.println(e);
@@ -455,12 +463,18 @@ public class QuadTreeImage extends ImageProcessing{
         }
 
         public void applyCompression(){
-                double start = System.nanoTime();
-                compress();
-                double finish = System.nanoTime();
-                this.elapsedTime = (finish - start)/1_000_000_000;
-                System.out.println("Compression Elapsed Time: " + this.elapsedTime + " seconds");
-                reconstructImage();
+                try{
+                        this.img_output = ImageIO.read(new File(getAbsPath()));
+                        double start = System.nanoTime();
+                        compress();
+                        double finish = System.nanoTime();
+                        this.elapsedTime = (finish - start)/1_000_000_000;
+                        System.out.println("Compression Elapsed Time: " + this.elapsedTime + " seconds");
+                        reconstructImage();       
+                }
+                catch(IOException e){
+                        System.err.println(e);
+                }
         }
 
         public void viewCompressedImage() {

@@ -91,6 +91,11 @@ public class ImageProcessing {
 		return this.fileSize;
 	}
 
+	// Returns file absolute path
+	public String getAbsPath(){
+		return this.absPath;
+	}
+
 	// Returns true if image is null
 	public Boolean isImageEmpty(){
 		return this.image == null;
