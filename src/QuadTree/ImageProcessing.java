@@ -17,6 +17,7 @@ public class ImageProcessing {
 	private int width;
 	private int height;
 	private String absPath;
+	private String extension;
 
 	// Default constructor
 	public ImageProcessing() {
@@ -24,6 +25,7 @@ public class ImageProcessing {
 		this.absPath = " ";
 		this.width = 0;
 		this.height = 0;
+		this.extension = " ";
 	}
 
 	// User-defined constructor with absPath
@@ -32,6 +34,7 @@ public class ImageProcessing {
 		this.image = ImageIO.read(new File(absPath));
 		this.width = this.image.getWidth();
 		this.height = this.image.getHeight();
+		this.extension = getFileExtension(absPath);
 	}
 
 	// Loads image not from constructor
@@ -40,6 +43,7 @@ public class ImageProcessing {
 		this.image = ImageIO.read(new File(absPath));
 		this.width = this.image.getWidth();
 		this.height = this.image.getHeight();
+		this.extension = getFileExtension(absPath);
 	}
 
 	// Method for user input absolute path
@@ -68,6 +72,11 @@ public class ImageProcessing {
 		return this.height;
 	}
 
+	// Returns extension 
+	public String getExtension(){
+		return this.extension;
+	}
+
 	// Returns true if image is null
 	public Boolean isImageEmpty(){
 		return this.image == null;
@@ -81,6 +90,15 @@ public class ImageProcessing {
 		int pixel = image.getRGB(x, y);
 		Color color = new Color(pixel, true); // Extract color components
 		return new Pixel(color.getRed(), color.getGreen(), color.getBlue());
+	}
+
+	// Returns file extension
+	public static String getFileExtension(String fileName) {
+		int lastDotIndex = fileName.lastIndexOf('.');
+		if (lastDotIndex == -1 || lastDotIndex == fileName.length() - 1) {
+			return ""; // No extension found
+		}
+		return fileName.substring(lastDotIndex + 1);
 	}
 	
 	// Image viewer with JFrame
