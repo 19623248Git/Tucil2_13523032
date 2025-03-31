@@ -29,6 +29,7 @@ public class QuadTreeImage extends ImageProcessing{
 
         // Output image
         private BufferedImage img_output;
+        private String out_path;
 
         // Node structure
         public class Node{
@@ -170,6 +171,7 @@ public class QuadTreeImage extends ImageProcessing{
                 this.mode = 0; // default mode
                 this.elapsedTime = 0;
                 this.root = new Node();
+                this.out_path = "compressed";
                 this.img_output = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
                 for (int y = 0; y < getHeight(); y++) {
                         for (int x = 0; x < getWidth(); x++) {
@@ -190,6 +192,7 @@ public class QuadTreeImage extends ImageProcessing{
                 this.mode = 0; // default mode
                 this.elapsedTime = 0;
                 this.root = new Node();
+                this.out_path = "compressed";
                 this.img_output = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
                 for (int y = 0; y < getHeight(); y++) {
                         for (int x = 0; x < getWidth(); x++) {
@@ -397,6 +400,10 @@ public class QuadTreeImage extends ImageProcessing{
 
         public void reconstructImage(){
                 reconstructFromNode(root);
+                // We assume png extension for now
+                this.out_path += ".png";
+                File outputFile = new File(this.out_path);
+                ImageIO.write(this.img_output, "png", outputFile);
         }
 
         public void reconstructFromNode(Node node){
@@ -409,7 +416,7 @@ public class QuadTreeImage extends ImageProcessing{
                                 int b = (int) node.meanPixel.getB();
                                 Color color = new Color(r, g, b);
                                 // update output image;
-                                img_output.setRGB(x, y, color.getRGB());
+                                this.img_output.setRGB(x, y, color.getRGB());
                             }
                         }
                 } else {
