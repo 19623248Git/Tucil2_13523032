@@ -2,9 +2,11 @@ package QuadTree;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -400,10 +402,16 @@ public class QuadTreeImage extends ImageProcessing{
 
         public void reconstructImage(){
                 reconstructFromNode(root);
-                // We assume png extension for now
-                this.out_path += ".png";
-                File outputFile = new File(this.out_path);
-                ImageIO.write(this.img_output, "png", outputFile);
+                String extension = getExtension();
+                this.out_path += "." + extension;
+                System.out.println(this.out_path);
+                try {
+                        File outputFile = new File(this.out_path);
+                        ImageIO.write(this.img_output, extension, outputFile);
+                }
+                catch(IOException e){
+                        System.out.println(e);
+                }
         }
 
         public void reconstructFromNode(Node node){
