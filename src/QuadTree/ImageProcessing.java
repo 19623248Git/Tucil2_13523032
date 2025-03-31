@@ -77,6 +77,11 @@ public class ImageProcessing {
 		return this.extension;
 	}
 
+	// Returns image buffer
+	public BufferedImage getImage(){
+		return this.image;
+	}
+
 	// Returns true if image is null
 	public Boolean isImageEmpty(){
 		return this.image == null;

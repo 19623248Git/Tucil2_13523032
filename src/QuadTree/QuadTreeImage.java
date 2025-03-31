@@ -174,12 +174,7 @@ public class QuadTreeImage extends ImageProcessing{
                 this.elapsedTime = 0;
                 this.root = new Node();
                 this.out_path = "compressed";
-                this.img_output = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
-                for (int y = 0; y < getHeight(); y++) {
-                        for (int x = 0; x < getWidth(); x++) {
-                                img_output.setRGB(x, y, new Color(255, 255, 255).getRGB());
-                        }
-                }
+                this.img_output = getImage();
         }
 
         public QuadTreeImage(String absPath) throws IOException{
@@ -195,12 +190,7 @@ public class QuadTreeImage extends ImageProcessing{
                 this.elapsedTime = 0;
                 this.root = new Node();
                 this.out_path = "compressed";
-                this.img_output = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
-                for (int y = 0; y < getHeight(); y++) {
-                        for (int x = 0; x < getWidth(); x++) {
-                                img_output.setRGB(x, y, new Color(255, 255, 255).getRGB());
-                        }
-                }
+                this.img_output = getImage();
         }
 
         // Getters
@@ -404,7 +394,6 @@ public class QuadTreeImage extends ImageProcessing{
                 reconstructFromNode(root);
                 String extension = getExtension();
                 this.out_path += "." + extension;
-                System.out.println(this.out_path);
                 try {
                         File outputFile = new File(this.out_path);
                         ImageIO.write(this.img_output, extension, outputFile);
