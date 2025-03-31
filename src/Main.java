@@ -1,86 +1,58 @@
-import QuadTree.ImageProcessing;
-import QuadTree.Pixel;
+import QuadTree.QuadTreeImage;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 import java.util.Scanner;
-import java.util.function.Consumer;
+import java.util.logging.*;
 
 public class Main {
+    private static final Logger logger = Logger.getLogger(Main.class.getName());
+
     public static void main(String[] args) {
-	try (Scanner scanner = new Scanner(System.in)) {
-	    ImageProcessing imgProc = new ImageProcessing();
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter image path: ");
+        String path = scanner.nextLine();
 
-	    Map<Integer, Consumer<Scanner>> menuActions = new HashMap<>();
+        try {
+            // Initialize logger
+            FileHandler fh = new FileHandler("node_errors.log");
+            fh.setFormatter(new SimpleFormatter());
+            logger.addHandler(fh);
+            logger.setUseParentHandlers(false);
 
-	    menuActions.put(1, (sc) -> {
-		System.out.print("Enter the absolute path of the image: ");
-		String path = sc.nextLine();
-		try {
-		    imgProc.loadImage(path);
-		    System.out.println("Image loaded successfully.");
-		} catch (IOException e) {
-		    System.out.println("Error loading image. Check the file path.");
-		}
-	    });
+            QuadTreeImage compressor = new QuadTreeImage(path);
+            
+            // Set compression parameters
+            compressor.setMode(0);
+            compressor.setVarThres(50);
+            
+            // Perform compression
+            compressor.applyCompression();
+            
+            // Log node errors
+            List<QuadTreeImage.Node> nodes = compressor.getAllNodes();
+            logger.info("Total nodes: " + nodes.size());
+            
+            for (QuadTreeImage.Node node : nodes) {
+                logger.info(String.format(
+                    "Node [%d-%d][%d-%d] Error: %.2f | Size: %d | Leaf: %s",
+                    node.getStartX(), node.getEndX(),
+                    node.getStartY(), node.getEndY(),
+                    node.getError(),
+                    node.getSize(),
+                    node.isLeaf()
+                ));
+            }
 
-	    menuActions.put(2, (sc) -> {
-		if (imgProc.isImageEmpty()) {
-		    System.out.println("No image loaded. Load an image first.");
-		    return;
-		}
-		System.out.print("Enter x coordinate: ");
-		int x = sc.nextInt();
-		System.out.print("Enter y coordinate: ");
-		int y = sc.nextInt();
+            // Display images
+            System.out.println("\nOriginal Image:");
+            compressor.viewImage();
+            System.out.println("\nCompressed Image:");
+            compressor.viewCompressedImage();
 
-		try {
-		    Pixel pixel = imgProc.getPixelValue(x, y);
-		    System.out.println("Pixel RGB at (" + x + ", " + y + "): R=" + pixel.getR() + ", G=" + pixel.getG() + ", B=" + pixel.getB());
-		} catch (IllegalArgumentException e) {
-		    System.out.println("Error: " + e.getMessage());
-		}
-	    });
-
-	    menuActions.put(3, (sc) -> 
-		System.out.println("Image Dimensions: " + imgProc.getWidth() + "x" + imgProc.getHeight())
-	    );
-
-	    menuActions.put(4, (sc) -> {
-		if (imgProc.isImageEmpty()) {
-		    System.out.println("No image loaded. Load an image first.");
-		    return;
-		}
-		imgProc.viewImage();
-	    });
-
-	    menuActions.put(5, (sc) -> {
-		System.out.println("Exiting...");
-		System.exit(0);
-	    });
-
-	    while (true) {
-		System.out.println("\n===== Image Processing Menu =====");
-		System.out.println("1. Load Image");
-		System.out.println("2. Get Pixel RGB Value");
-		System.out.println("3. Show Image Dimensions");
-		System.out.println("4. View Image");
-		System.out.println("5. Exit");
-		System.out.print("Enter your choice: ");
-
-		if (!scanner.hasNextInt()) {
-		    System.out.println("Invalid input. Please enter a number.");
-		    scanner.nextLine();
-		    continue;
-		}
-
-		int choice = scanner.nextInt();
-		scanner.nextLine();
-
-		menuActions.getOrDefault(choice, (sc) -> 
-		    System.out.println("Invalid choice. Please try again.")
-		).accept(scanner);
-	    }
-	}
+        } catch (IOException e) {
+            System.err.println("Error: " + e.getMessage());
+        } finally {
+            scanner.close();
+        }
     }
 }
