@@ -401,12 +401,106 @@ public class QuadTreeImage extends ImageProcessing{
                 return entropy;
         }
 
+        public void findPercentage(double expectedPercentage, double tolerance, int max_iter){
+                double max, min, start;
+                Boolean solution_found = false;
+                if(this.mode >= 0 && this.mode <= 2){
+                        min = 0;
+                        max = 225;
+                        start = (max + min) / 2;
+                        switch (this.mode) {
+                                case 0: 
+                                        this.var_thres = start;
+                                        break;
+                                case 1: 
+                                        this.mad_thres = start;
+                                        break;
+                                case 2: 
+                                        this.mpd_thres = start;
+                                        break;
+                            default:
+                                this.var_thres = start;
+                                break;
+                        }
+                }
+                else if(this.mode == 3){
+                        min = 2;
+                        max = 8;
+                        start = (max + min) / 2;
+                        this.entr_thres = start;
+                }
+                else{
+                        // ssim
+                        min = 0;
+                        max = 1;
+                        start = (max + min) / 2;
+                        this.ssim_thres = start;
+                        // temporary return
+                        return;
+                }
+
+                this.compressPercent = 1000;
+
+                while(!solution_found && max_iter > 0){
+                        System.out.println("var thres: " + this.var_thres);
+                        applyCompression();
+                        if(this.compressPercent > expectedPercentage + tolerance){
+                                switch (this.mode) {
+                                        case 0:
+                                                this.var_thres /= 2;
+                                                break;
+                                        case 1:
+                                                this.mad_thres /= 2;
+                                                break;
+                                        case 2:
+                                                this.mpd_thres /= 2;
+                                                break;
+                                        case 3:
+                                                this.entr_thres /= 2;
+                                                break;
+                                        case 4:
+                                                this.ssim_thres /= 2;
+                                                break;
+                                        default:
+                                                this.var_thres /= 2;
+                                                break;
+                                }
+                        }
+                        else if(this.compressPercent < expectedPercentage - tolerance){
+                                switch (this.mode) {
+                                        case 0:
+                                                this.var_thres += (this.var_thres/2);
+                                                break;
+                                        case 1:
+                                                this.mad_thres += (this.mad_thres/2);
+                                                break;
+                                        case 2:
+                                                this.mpd_thres += (this.mpd_thres/2);
+                                                break;
+                                        case 3:
+                                                this.entr_thres += (this.entr_thres/2);
+                                                break;
+                                        case 4:
+                                                this.ssim_thres += (this.ssim_thres/2);
+                                                break;
+                                        default:
+                                                this.var_thres += (this.var_thres/2);
+                                                break;
+                                }
+                        }
+                        else if(this.compressPercent > (expectedPercentage - tolerance) && this.compressPercent < (expectedPercentage + tolerance)){
+                                solution_found = true;
+                        }
+                        max_iter-=1;
+                } 
+        }
+
         public void reconstructImage(){
                 reconstructFromNode(root);
                 String extension = getExtension();
-                this.out_path += "." + extension;
+                String outPath = this.out_path + "." + extension;
                 try {
-                        File outputFile = new File(this.out_path);
+                        File outputFile = new File(outPath);
                         ImageIO.write(this.img_output, extension, outputFile);
                         this.compressedSize = outputFile.length();
                         this.compressPercent = 100 - ((this.compressedSize / getFileSize()) * 100); // this is in percentage
@@ -470,7 +564,9 @@ public class QuadTreeImage extends ImageProcessing{
                         double finish = System.nanoTime();
                         this.elapsedTime = (finish - start)/1_000_000_000;
                         System.out.println("Compression Elapsed Time: " + this.elapsedTime + " seconds");
-                        reconstructImage();       
+                        reconstructImage();
+                        this.img_output.flush();
+                        this.img_output = null;
                 }
                 catch(IOException e){
                         System.err.println(e);
