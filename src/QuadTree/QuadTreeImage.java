@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -446,46 +447,22 @@ public class QuadTreeImage extends ImageProcessing{
                         applyCompression();
                         if(this.compressPercent > expectedPercentage + tolerance){
                                 switch (this.mode) {
-                                        case 0:
-                                                this.var_thres /= 2;
-                                                break;
-                                        case 1:
-                                                this.mad_thres /= 2;
-                                                break;
-                                        case 2:
-                                                this.mpd_thres /= 2;
-                                                break;
-                                        case 3:
-                                                this.entr_thres /= 2;
-                                                break;
-                                        case 4:
-                                                this.ssim_thres /= 2;
-                                                break;
-                                        default:
-                                                this.var_thres /= 2;
-                                                break;
+                                        case 0 -> this.var_thres /= 2;
+                                        case 1 -> this.mad_thres /= 2;
+                                        case 2 -> this.mpd_thres /= 2;
+                                        case 3 -> this.entr_thres /= 2;
+                                        case 4 -> this.ssim_thres /= 2;
+                                        default -> this.var_thres /= 2;
                                 }
                         }
                         else if(this.compressPercent < expectedPercentage - tolerance){
                                 switch (this.mode) {
-                                        case 0:
-                                                this.var_thres += (this.var_thres/2);
-                                                break;
-                                        case 1:
-                                                this.mad_thres += (this.mad_thres/2);
-                                                break;
-                                        case 2:
-                                                this.mpd_thres += (this.mpd_thres/2);
-                                                break;
-                                        case 3:
-                                                this.entr_thres += (this.entr_thres/2);
-                                                break;
-                                        case 4:
-                                                this.ssim_thres += (this.ssim_thres/2);
-                                                break;
-                                        default:
-                                                this.var_thres += (this.var_thres/2);
-                                                break;
+                                        case 0 -> this.var_thres += (this.var_thres/2);
+                                        case 1 -> this.mad_thres += (this.mad_thres/2);
+                                        case 2 -> this.mpd_thres += (this.mpd_thres/2);
+                                        case 3 -> this.entr_thres += (this.entr_thres/2);
+                                        case 4 -> this.ssim_thres += (this.ssim_thres/2);
+                                        default -> this.var_thres += (this.var_thres/2);
                                 }
                         }
                         else if(this.compressPercent > (expectedPercentage - tolerance) && this.compressPercent < (expectedPercentage + tolerance)){
@@ -543,7 +520,7 @@ public class QuadTreeImage extends ImageProcessing{
 
         private void traverseNodes(Node node, List<Node> nodes) {
                 if (node == null) return;
-                        nodes.add(node);
+                nodes.add(node);
                 if (!node.isLeaf()) {
                         traverseNodes(node.ne, nodes);
                         traverseNodes(node.se, nodes);
@@ -586,5 +563,137 @@ public class QuadTreeImage extends ImageProcessing{
                 frame.pack();
                 frame.setLocationRelativeTo(null);
                 frame.setVisible(true);
+        }
+
+        public void start() {
+                Boolean end_process = false;
+                Boolean input_path = true;
+                Boolean output_path = true;
+                Boolean pick_mode = true;
+                Boolean input_block_size = true;
+                Boolean start_compress = true;
+                Boolean find_compress_percent = false;
+                Scanner scanner = new Scanner(System.in);
+                while(!end_process){
+                        if(input_path){
+                                this.inputAbsPath();
+                        }
+
+                        if(output_path){
+                                System.out.println("Input absolute output path: ");
+                                this.out_path = scanner.nextLine();
+                        }
+
+                        if(pick_mode){
+                                System.out.println("Pick error calculation method: ");
+                                System.out.println("1. Variance ");
+                                System.out.println("2. Mean Absolute Deviation ");
+                                System.out.println("3. Max Pixel Difference ");
+                                System.out.println("4. Entropy ");
+                                System.out.println("5. SSIM ");
+                                this.mode = scanner.nextInt();
+                                this.mode-=1; // adjust to switch case statements from other methods
+                                switch (this.mode) {
+                                        case 0 -> {
+                                                System.out.println("Input variance threshold: ");
+                                                this.var_thres = scanner.nextDouble();
+                                        }
+                                        case 1 -> {
+                                                System.out.println("Input MAD threshold: ");
+                                                this.mad_thres = scanner.nextDouble();
+                                        }
+                                        case 2 -> {
+                                                System.out.println("Input MPD threshold: ");
+                                                this.mpd_thres = scanner.nextDouble();
+                                        }
+                                        case 3 -> {
+                                                System.out.println("Input Entropy threshold: ");
+                                                this.entr_thres = scanner.nextDouble();
+                                        }
+                                        case 4 -> {
+                                                System.out.println("Input SSIM threshold: ");
+                                                this.ssim_thres = scanner.nextDouble();
+                                        }
+                                        default -> {
+                                                System.out.println("Input variance threshold: ");
+                                                this.var_thres = scanner.nextDouble();
+                                        }
+                                }
+                        }
+                        if(input_block_size){
+                                System.out.println("Input minimum block size for each node: ");
+                                this.minBlockSize = scanner.nextInt();
+                        }
+                        
+                        if(start_compress || input_path || output_path || pick_mode || input_block_size){
+                                System.out.println("Start compression [y/n] ?");
+                                Boolean confirm = false;
+                                while(!confirm){
+                                        String response = scanner.nextLine();
+                                        if("y".equals(response) || "Y".equals(response)){
+                                                applyCompression();
+                                                confirm = true;
+                                        }
+                                        else if("n".equals(response) || "N".equals(response)){
+                                                System.out.println("Redirecting to target compression percentage finder...");
+                                                find_compress_percent = true;
+                                                confirm = true;
+                                        }
+                                        else{
+                                                System.out.println("Invalid input please try again!");
+                                        }
+                                }
+                        }
+                        
+                        if(find_compress_percent){
+                                double expectedPercentage, tolerance;
+                                int max_iter;
+                                System.out.println("Input target compression percentage (optional): ");
+                                if(scanner.nextInt()==0){
+                                        System.out.println("Skipping the process");
+                                }
+                                else {
+                                        expectedPercentage = scanner.nextDouble();
+                                        System.out.println("Input tolerance for target: ");
+                                        tolerance = scanner.nextDouble();
+                                        System.out.println("Input maximum iteration (infinite loop prevention): ");
+                                        max_iter = scanner.nextInt();
+                                        findPercentage(expectedPercentage, tolerance, max_iter);
+                                }
+                        }
+
+                        input_path = false;
+                        output_path = false;
+                        pick_mode = false;
+                        input_block_size = false;
+                        start_compress = false;
+                        find_compress_percent = false;
+
+                        System.out.println("Do you want to exit the process [y/n] ?");
+                        if("y".equals(scanner.nextLine()) || "Y".equals(scanner.nextLine())){
+                                end_process = true;
+                        }
+                        else{
+                                // if not yes then we ask for which part of input
+                                System.out.println("Select what to do next: ");
+                                System.out.println("1. re-input absolute image path ");
+                                System.out.println("2. re-input absolute output path ");
+                                System.out.println("3. re-input error calculation mode ");
+                                System.out.println("4. re-input block size minimum ");
+                                System.out.println("5. repeat compression process ");
+                                System.out.println("6. compression with target percentage ");
+                                switch (scanner.nextInt()) {
+                                        case 1 -> input_path = true;
+                                        case 2 -> output_path = true;
+                                        case 3 -> pick_mode = true;
+                                        case 4 -> input_block_size = true;
+                                        case 5 -> start_compress = true;
+                                        case 6 -> find_compress_percent = true;
+                                        default -> {
+                                                input_path = true;
+                                        }
+                                }
+                        }
+                }
         }
 }
