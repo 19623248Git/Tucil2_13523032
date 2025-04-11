@@ -44,8 +44,7 @@ public class QuadTreeImage extends ImageProcessing{
                 private Pixel meanPixel;
 
                 // Tree data structure
-                // private Node parent; // maybe a quad tree doesn't need a parent node, let's remove it now
-                private Node ne, se, sw, nw; // instead of list of childrens, determine 4 childrens
+                private Node ne, se, sw, nw;
 
                 // default constructor
                 public Node(){
