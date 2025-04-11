@@ -8,10 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JScrollPane;
 
 public class QuadTreeImage extends ImageProcessing{
 
@@ -528,7 +524,20 @@ public class QuadTreeImage extends ImageProcessing{
                 }
         }
 
-        
+        public int getTreeDepth() {
+                return computeDepth(root);
+            }
+            
+        private int computeDepth(Node node) {
+                if (node == null || node.isLeaf()) {
+                        return 1; // a leaf or null counts as depth 1 from its own level
+                }
+                int ne = computeDepth(node.ne);
+                int se = computeDepth(node.se);
+                int sw = computeDepth(node.sw);
+                int nw = computeDepth(node.nw);
+                return 1 + Math.max(Math.max(ne, se), Math.max(sw, nw));
+        }
             
 
         public void compress(){
@@ -552,20 +561,20 @@ public class QuadTreeImage extends ImageProcessing{
                 }
         }
 
-        public void viewCompressedImage() {
-                if (img_output == null) {
-                        System.out.println("No compressed image available.");
-                        return;
-                }
+        // public void viewCompressedImage() {
+        //         if (img_output == null) {
+        //                 System.out.println("No compressed image available.");
+        //                 return;
+        //         }
 
-                JFrame frame = new JFrame("Compressed Image");
-                frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-                JLabel label = new JLabel(new ImageIcon(img_output));
-                frame.add(new JScrollPane(label));
-                frame.pack();
-                frame.setLocationRelativeTo(null);
-                frame.setVisible(true);
-        }
+        //         JFrame frame = new JFrame("Compressed Image");
+        //         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        //         JLabel label = new JLabel(new ImageIcon(img_output));
+        //         frame.add(new JScrollPane(label));
+        //         frame.pack();
+        //         frame.setLocationRelativeTo(null);
+        //         frame.setVisible(true);
+        // }
 
         public void start() {
                 Boolean end_process = false;
