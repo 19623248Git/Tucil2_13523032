@@ -443,7 +443,6 @@ public class QuadTreeImage extends ImageProcessing{
                 this.compressPercent = 1000;
 
                 while(!solution_found && max_iter > 0){
-                        System.out.println("var thres: " + this.var_thres);
                         applyCompression();
                         if(this.compressPercent > expectedPercentage + tolerance){
                                 switch (this.mode) {
@@ -529,6 +528,9 @@ public class QuadTreeImage extends ImageProcessing{
                 }
         }
 
+        
+            
+
         public void compress(){
                 root.DnC();
         }
@@ -577,10 +579,11 @@ public class QuadTreeImage extends ImageProcessing{
                 while(!end_process){
                         if(input_path){
                                 this.inputAbsPath();
+                                this.root = new Node();
                         }
 
                         if(output_path){
-                                System.out.println("Input absolute output path: ");
+                                System.out.print("Input absolute output path (without extension): ");
                                 this.out_path = scanner.nextLine();
                         }
 
@@ -592,26 +595,27 @@ public class QuadTreeImage extends ImageProcessing{
                                 System.out.println("4. Entropy ");
                                 System.out.println("5. SSIM ");
                                 this.mode = scanner.nextInt();
+                                scanner.nextLine();
                                 this.mode-=1; // adjust to switch case statements from other methods
                                 switch (this.mode) {
                                         case 0 -> {
-                                                System.out.println("Input variance threshold: ");
+                                                System.out.print("Input variance threshold: ");
                                                 this.var_thres = scanner.nextDouble();
                                         }
                                         case 1 -> {
-                                                System.out.println("Input MAD threshold: ");
+                                                System.out.print("Input MAD threshold: ");
                                                 this.mad_thres = scanner.nextDouble();
                                         }
                                         case 2 -> {
-                                                System.out.println("Input MPD threshold: ");
+                                                System.out.print("Input MPD threshold: ");
                                                 this.mpd_thres = scanner.nextDouble();
                                         }
                                         case 3 -> {
-                                                System.out.println("Input Entropy threshold: ");
+                                                System.out.print("Input Entropy threshold: ");
                                                 this.entr_thres = scanner.nextDouble();
                                         }
                                         case 4 -> {
-                                                System.out.println("Input SSIM threshold: ");
+                                                System.out.print("Input SSIM threshold: ");
                                                 this.ssim_thres = scanner.nextDouble();
                                         }
                                         default -> {
@@ -619,14 +623,16 @@ public class QuadTreeImage extends ImageProcessing{
                                                 this.var_thres = scanner.nextDouble();
                                         }
                                 }
+                                scanner.nextLine();
                         }
                         if(input_block_size){
-                                System.out.println("Input minimum block size for each node: ");
+                                System.out.print("Input minimum block size for each node: ");
                                 this.minBlockSize = scanner.nextInt();
+                                scanner.nextLine();
                         }
                         
                         if(start_compress || input_path || output_path || pick_mode || input_block_size){
-                                System.out.println("Start compression [y/n] ?");
+                                System.out.print("Start compression [y/n] ?");
                                 Boolean confirm = false;
                                 while(!confirm){
                                         String response = scanner.nextLine();
@@ -648,16 +654,18 @@ public class QuadTreeImage extends ImageProcessing{
                         if(find_compress_percent){
                                 double expectedPercentage, tolerance;
                                 int max_iter;
-                                System.out.println("Input target compression percentage (optional): ");
+                                System.out.print("Input target compression percentage (optional): ");
                                 if(scanner.nextInt()==0){
-                                        System.out.println("Skipping the process");
+                                        System.out.println("Skipping the process...");
                                 }
                                 else {
                                         expectedPercentage = scanner.nextDouble();
-                                        System.out.println("Input tolerance for target: ");
+                                        System.out.print("Input tolerance for target: ");
                                         tolerance = scanner.nextDouble();
-                                        System.out.println("Input maximum iteration (infinite loop prevention): ");
+                                        scanner.nextLine();
+                                        System.out.print("Input maximum iteration (infinite loop prevention): ");
                                         max_iter = scanner.nextInt();
+                                        scanner.nextLine();
                                         findPercentage(expectedPercentage, tolerance, max_iter);
                                 }
                         }
@@ -669,8 +677,9 @@ public class QuadTreeImage extends ImageProcessing{
                         start_compress = false;
                         find_compress_percent = false;
 
-                        System.out.println("Do you want to exit the process [y/n] ?");
-                        if("y".equals(scanner.nextLine()) || "Y".equals(scanner.nextLine())){
+                        System.out.print("Do you want to exit the process [y/n] ?");
+                        String exitResponse = scanner.nextLine();
+                        if ("y".equalsIgnoreCase(exitResponse)) {
                                 end_process = true;
                         }
                         else{
@@ -693,6 +702,7 @@ public class QuadTreeImage extends ImageProcessing{
                                                 input_path = true;
                                         }
                                 }
+                                scanner.nextLine();
                         }
                 }
         }
