@@ -722,6 +722,10 @@ public class QuadTreeImage extends ImageProcessing{
                         if(input_block_size){
                                 System.out.print("Input minimum block size for each node: ");
                                 this.minBlockSize = scanner.nextInt();
+                                if (this.minBlockSize < 4){
+                                        System.out.println("the block input is too small, may cause a stackOverflow error, defaulting to 4...");
+                                        this.minBlockSize = 4;
+                                }
                                 scanner.nextLine();
                         }
                         
@@ -773,7 +777,7 @@ public class QuadTreeImage extends ImageProcessing{
                         start_compress = false;
                         find_compress_percent = false;
 
-                        System.out.print("Do you want to exit the process [y/n] ?: ");
+                        System.out.print("Do you want to exit the program [y/n] ?: ");
                         String exitResponse = scanner.nextLine();
                         if ("y".equalsIgnoreCase(exitResponse)) {
                                 end_process = true;
