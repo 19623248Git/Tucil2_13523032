@@ -18,7 +18,6 @@ public class QuadTreeImage extends ImageProcessing{
         private double mpd_thres;
         private double entr_thres;
         private double ssim_thres;
-        private Pixel meanOriginalPixel;
 
         // Algorithm attributes
         private int mode;
@@ -175,7 +174,6 @@ public class QuadTreeImage extends ImageProcessing{
                 this.out_path = "compressed";
                 this.img_output = getImage();
                 this.compressedSize = 0;
-                this.meanOriginalPixel = new Pixel();
         }
 
         public QuadTreeImage(String absPath) throws IOException{
@@ -193,7 +191,6 @@ public class QuadTreeImage extends ImageProcessing{
                 this.out_path = "compressed";
                 this.img_output = getImage();
                 this.compressedSize = 0;
-                this.meanOriginalPixel = new Pixel();
         }
 
         // Getters
@@ -261,11 +258,6 @@ public class QuadTreeImage extends ImageProcessing{
         public void setOutPath(String out_path){
                 this.out_path = out_path;
         }
-        
-        public void setMeanOriginalPixel(){
-                this.meanOriginalPixel = meanPixelRange(0, getWidth()-1, 0, getHeight()-1);
-        }
-
         // Get mean of pixels between x1 - x2 and y1 - y2
         public Pixel meanPixelRange(int start_x, int end_x, int start_y, int end_y){
                 Pixel meanPixel = new Pixel();
@@ -459,7 +451,7 @@ public class QuadTreeImage extends ImageProcessing{
                 double ssimG = ((2 * meanG * meanPixel.getG() + c1)*((2*covG) + c2)) / (((meanG * meanG) + (meanPixel.getG() * meanPixel.getG()) + c1) * (varG +c2));
                 double ssimB = ((2 * meanB * meanPixel.getB() + c1)*((2*covB) + c2)) / (((meanB * meanB) + (meanPixel.getB() * meanPixel.getB()) + c1) * (varB +c2));
 
-                return 1 - (ssimR + ssimG + ssimB);
+                return 1 - ((0.299 * ssimR) + (0.587*ssimG) + (0.114*ssimB));
 
         }
 
@@ -673,7 +665,7 @@ public class QuadTreeImage extends ImageProcessing{
                         if(input_path){
                                 this.inputAbsPath();
                                 this.root = new Node();
-                                setMeanOriginalPixel();
+
                         }
 
                         if(output_path){
