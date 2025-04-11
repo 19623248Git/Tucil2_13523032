@@ -18,6 +18,7 @@ public class QuadTreeImage extends ImageProcessing{
         private double mpd_thres;
         private double entr_thres;
         private double ssim_thres;
+        private Pixel meanOriginalPixel;
 
         // Algorithm attributes
         private int mode;
@@ -174,6 +175,7 @@ public class QuadTreeImage extends ImageProcessing{
                 this.out_path = "compressed";
                 this.img_output = getImage();
                 this.compressedSize = 0;
+                this.meanOriginalPixel = new Pixel();
         }
 
         public QuadTreeImage(String absPath) throws IOException{
@@ -191,6 +193,7 @@ public class QuadTreeImage extends ImageProcessing{
                 this.out_path = "compressed";
                 this.img_output = getImage();
                 this.compressedSize = 0;
+                this.meanOriginalPixel = new Pixel();
         }
 
         // Getters
@@ -258,6 +261,10 @@ public class QuadTreeImage extends ImageProcessing{
         public void setOutPath(String out_path){
                 this.out_path = out_path;
         }
+        
+        public void setMeanOriginalPixel(){
+                this.meanOriginalPixel = meanPixelRange(0, getWidth()-1, 0, getHeight()-1);
+        }
 
         // Get mean of pixels between x1 - x2 and y1 - y2
         public Pixel meanPixelRange(int start_x, int end_x, int start_y, int end_y){
@@ -279,6 +286,7 @@ public class QuadTreeImage extends ImageProcessing{
                         case 1 -> calcMad(node.start_x, node.end_x, node.start_y, node.end_y, node.meanPixel);
                         case 2 -> calcMpd(node.start_x, node.end_x, node.start_y, node.end_y);
                         case 3 -> calcEntropy(node.start_x, node.end_x, node.start_y, node.end_y);
+                        case 4 -> calcSsim(node.start_x, node.end_x, node.start_y, node.end_y, this.meanOriginalPixel);
                         default -> throw new IllegalArgumentException("Invalid mode: " + this.mode);
                 }; 
         }
@@ -290,6 +298,7 @@ public class QuadTreeImage extends ImageProcessing{
                         case 1 -> node.error <= this.mad_thres;
                         case 2 -> node.error <= this.mpd_thres;
                         case 3 -> node.error <= this.entr_thres;
+                        case 4 -> node.error <= this.ssim_thres;
                         default -> throw new IllegalArgumentException("Invalid mode: " + this.mode);
                 }; 
         }
@@ -386,7 +395,70 @@ public class QuadTreeImage extends ImageProcessing{
                 
                 return (entropyR + entropyG + entropyB) / 3.0;
         }
-            
+
+        public double calcSsim(int x_start, int x_end, int y_start, int y_end, Pixel meanOriginalPixel){
+
+                double n = (x_end - x_start + 1) * (y_end - y_start + 1);
+
+                double sumR = 0;
+                double sumG = 0;
+                double sumB = 0;
+                double sumR2 = 0;
+                double sumG2 = 0;
+                double sumB2 = 0;
+                double sumRMean = 0;
+                double sumGMean = 0;
+                double sumBMean = 0;
+
+                for(int y = y_start; y < y_end; y++){
+                        for(int x = x_start; x < x_end; x++){
+
+                                double r_val = getPixelValue(x, y).getR();
+                                double g_val = getPixelValue(x, y).getG();
+                                double b_val = getPixelValue(x, y).getB();
+                                 
+                                sumR += r_val;
+                                sumG += g_val;
+                                sumB += b_val;
+
+                                sumR2 += (r_val * r_val);
+                                sumG2 += (g_val * g_val);
+                                sumB2 += (b_val * b_val);
+
+                                sumRMean += (r_val * meanOriginalPixel.getR());
+                                sumGMean += (r_val * meanOriginalPixel.getG());
+                                sumBMean += (r_val * meanOriginalPixel.getB());
+
+                        }
+                }
+
+                double meanR = sumR / n;
+                double meanG = sumG / n;
+                double meanB = sumB / n;
+
+                double varR  = (sumR2 / n) - (meanR * meanR);
+                double varG  = (sumG2 / n) - (meanG * meanG);
+                double varB  = (sumB2 / n) - (meanB * meanB);
+
+                double covR = (sumRMean / n)  - (meanR * meanOriginalPixel.getR());
+                double covG = (sumGMean / n)  - (meanG * meanOriginalPixel.getG());
+                double covB = (sumBMean / n)  - (meanB * meanOriginalPixel.getB());
+
+                double L_val =  255;
+                double k1 = 0.01;
+                double k2 = 0.03;
+
+                double c1 = (k1*L_val) * (k1*L_val);
+                double c2 = (k2*L_val) * (k2*L_val);
+
+                double ssimR = (2 * meanR * meanOriginalPixel.getR() + c1) * (2*covR + c2) / (((meanR * meanR) + (meanOriginalPixel.getR() * meanOriginalPixel.getR()) + c1) * (varR +c2));
+                double ssimG = (2 * meanG * meanOriginalPixel.getG() + c1) * (2*covG + c2) / (((meanG * meanG) + (meanOriginalPixel.getG() * meanOriginalPixel.getG()) + c1) * (varG +c2));
+                double ssimB = (2 * meanB * meanOriginalPixel.getB() + c1) * (2*covB + c2) / (((meanB * meanB) + (meanOriginalPixel.getB() * meanOriginalPixel.getB()) + c1) * (varB +c2));
+
+                return (ssimR + ssimG + ssimB) / 3;
+
+        }
+
         private double calculateChannelEntropy(int[] histogram, int totalPixels) {
                 double entropy = 0.0;
                 for (int i = 0; i < 256; i++) {
@@ -432,8 +504,6 @@ public class QuadTreeImage extends ImageProcessing{
                         max = 1;
                         start = (max + min) / 2;
                         this.ssim_thres = start;
-                        // temporary return
-                        return;
                 }
 
                 this.compressPercent = 1000;
@@ -536,7 +606,7 @@ public class QuadTreeImage extends ImageProcessing{
 
         public int getTreeDepth() {
                 return computeDepth(root);
-            }
+        }
             
         private int computeDepth(Node node) {
                 if (node == null || node.isLeaf()) {
@@ -599,6 +669,7 @@ public class QuadTreeImage extends ImageProcessing{
                         if(input_path){
                                 this.inputAbsPath();
                                 this.root = new Node();
+                                setMeanOriginalPixel();
                         }
 
                         if(output_path){
