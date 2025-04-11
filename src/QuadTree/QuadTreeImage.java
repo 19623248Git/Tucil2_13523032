@@ -286,7 +286,7 @@ public class QuadTreeImage extends ImageProcessing{
                         case 1 -> calcMad(node.start_x, node.end_x, node.start_y, node.end_y, node.meanPixel);
                         case 2 -> calcMpd(node.start_x, node.end_x, node.start_y, node.end_y);
                         case 3 -> calcEntropy(node.start_x, node.end_x, node.start_y, node.end_y);
-                        case 4 -> calcSsim(node.start_x, node.end_x, node.start_y, node.end_y, this.meanOriginalPixel);
+                        case 4 -> calcSsim(node.start_x, node.end_x, node.start_y, node.end_y, node.meanPixel);
                         default -> throw new IllegalArgumentException("Invalid mode: " + this.mode);
                 }; 
         }
@@ -396,7 +396,7 @@ public class QuadTreeImage extends ImageProcessing{
                 return (entropyR + entropyG + entropyB) / 3.0;
         }
 
-        public double calcSsim(int x_start, int x_end, int y_start, int y_end, Pixel meanOriginalPixel){
+        public double calcSsim(int x_start, int x_end, int y_start, int y_end, Pixel meanPixel){
 
                 double n = (x_end - x_start + 1) * (y_end - y_start + 1);
 
@@ -425,9 +425,9 @@ public class QuadTreeImage extends ImageProcessing{
                                 sumG2 += (g_val * g_val);
                                 sumB2 += (b_val * b_val);
 
-                                sumRMean += (r_val * meanOriginalPixel.getR());
-                                sumGMean += (r_val * meanOriginalPixel.getG());
-                                sumBMean += (r_val * meanOriginalPixel.getB());
+                                sumRMean += (r_val * meanPixel.getR());
+                                sumGMean += (r_val * meanPixel.getG());
+                                sumBMean += (r_val * meanPixel.getB());
 
                         }
                 }
@@ -440,9 +440,13 @@ public class QuadTreeImage extends ImageProcessing{
                 double varG  = (sumG2 / n) - (meanG * meanG);
                 double varB  = (sumB2 / n) - (meanB * meanB);
 
-                double covR = (sumRMean / n)  - (meanR * meanOriginalPixel.getR());
-                double covG = (sumGMean / n)  - (meanG * meanOriginalPixel.getG());
-                double covB = (sumBMean / n)  - (meanB * meanOriginalPixel.getB());
+                // omit covariance because we are comparing the same thing
+                // double covR = (sumRMean / n)  - (meanR * meanPixel.getR());
+                // double covG = (sumGMean / n)  - (meanG * meanPixel.getG());
+                // double covB = (sumBMean / n)  - (meanB * meanPixel.getB());
+                double covR = 0;
+                double covG = 0;
+                double covB = 0;
 
                 double L_val =  255;
                 double k1 = 0.01;
@@ -451,11 +455,11 @@ public class QuadTreeImage extends ImageProcessing{
                 double c1 = (k1*L_val) * (k1*L_val);
                 double c2 = (k2*L_val) * (k2*L_val);
 
-                double ssimR = (2 * meanR * meanOriginalPixel.getR() + c1) * (2*covR + c2) / (((meanR * meanR) + (meanOriginalPixel.getR() * meanOriginalPixel.getR()) + c1) * (varR +c2));
-                double ssimG = (2 * meanG * meanOriginalPixel.getG() + c1) * (2*covG + c2) / (((meanG * meanG) + (meanOriginalPixel.getG() * meanOriginalPixel.getG()) + c1) * (varG +c2));
-                double ssimB = (2 * meanB * meanOriginalPixel.getB() + c1) * (2*covB + c2) / (((meanB * meanB) + (meanOriginalPixel.getB() * meanOriginalPixel.getB()) + c1) * (varB +c2));
+                double ssimR = ((2 * meanR * meanPixel.getR() + c1)*((2*covR) + c2)) / (((meanR * meanR) + (meanPixel.getR() * meanPixel.getR()) + c1) * (varR +c2));
+                double ssimG = ((2 * meanG * meanPixel.getG() + c1)*((2*covG) + c2)) / (((meanG * meanG) + (meanPixel.getG() * meanPixel.getG()) + c1) * (varG +c2));
+                double ssimB = ((2 * meanB * meanPixel.getB() + c1)*((2*covB) + c2)) / (((meanB * meanB) + (meanPixel.getB() * meanPixel.getB()) + c1) * (varB +c2));
 
-                return (ssimR + ssimG + ssimB) / 3;
+                return 1 - (ssimR + ssimG + ssimB);
 
         }
 
