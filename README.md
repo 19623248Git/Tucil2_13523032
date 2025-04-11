@@ -1,3 +1,9 @@
+# QuadTree Image Compression
+
+This is a java program that receives image input of type .png and .jpg and performs **QuadTree Compression** in order to shrink the file size of the input image.
+
+**Author:** Nathan Jovial Hartono - 13523032
+
 # How to run the CLI program
 
 ## Compiling the program
