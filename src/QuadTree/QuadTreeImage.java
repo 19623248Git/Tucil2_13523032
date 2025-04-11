@@ -437,9 +437,11 @@ public class QuadTreeImage extends ImageProcessing{
                 }
 
                 this.compressPercent = 1000;
+                
+                boolean noLogResults = false;
 
                 while(!solution_found && max_iter > 0){
-                        applyCompression();
+                        applyCompression(noLogResults);
                         if(this.compressPercent > expectedPercentage + tolerance){
                                 switch (this.mode) {
                                         case 0 -> this.var_thres /= 2;
@@ -464,11 +466,15 @@ public class QuadTreeImage extends ImageProcessing{
                                 solution_found = true;
                         }
                         max_iter-=1;
-                } 
+                }
+                applyCompression(!noLogResults);
         }
 
-        public void reconstructImage(){
+        public void reconstructImage(boolean logResults){
                 reconstructFromNode(root);
+                List<Node> treeNodes = getAllNodes();
+                int nodeCount = treeNodes.size();
+                int treeDepth = getTreeDepth();
                 String extension = getExtension();
                 String outPath = this.out_path + "." + extension;
                 try {
@@ -476,9 +482,13 @@ public class QuadTreeImage extends ImageProcessing{
                         ImageIO.write(this.img_output, extension, outputFile);
                         this.compressedSize = outputFile.length();
                         this.compressPercent = 100 - ((this.compressedSize / getFileSize()) * 100); // this is in percentage
-                        System.out.println("The original size: " + getFileSize() + " bytes");
-                        System.out.println("The compressed size: " + this.compressedSize + " bytes");
-                        System.out.println("The compression percentage: " + this.compressPercent + "%");
+                        if(logResults){
+                                System.out.println("The original size: " + getFileSize() + " bytes");
+                                System.out.println("The compressed size: " + this.compressedSize + " bytes");
+                                System.out.println("The compression percentage: " + this.compressPercent + "%");
+                                System.out.println("Total node count of Quadtree: " + nodeCount);
+                                System.out.println("Quadtree depth: " + treeDepth);
+                        }
                 }
                 catch(IOException e){
                         System.out.println(e);
@@ -544,7 +554,7 @@ public class QuadTreeImage extends ImageProcessing{
                 root.DnC();
         }
 
-        public void applyCompression(){
+        public void applyCompression(boolean logResults){
                 try{
                         this.img_output = ImageIO.read(new File(getAbsPath()));
                         double start = System.nanoTime();
@@ -552,7 +562,7 @@ public class QuadTreeImage extends ImageProcessing{
                         double finish = System.nanoTime();
                         this.elapsedTime = (finish - start)/1_000_000_000;
                         System.out.println("Compression Elapsed Time: " + this.elapsedTime + " seconds");
-                        reconstructImage();
+                        reconstructImage(logResults);
                         this.img_output.flush();
                         this.img_output = null;
                 }
@@ -597,12 +607,12 @@ public class QuadTreeImage extends ImageProcessing{
                         }
 
                         if(pick_mode){
-                                System.out.println("Pick error calculation method: ");
                                 System.out.println("1. Variance ");
                                 System.out.println("2. Mean Absolute Deviation ");
                                 System.out.println("3. Max Pixel Difference ");
                                 System.out.println("4. Entropy ");
                                 System.out.println("5. SSIM ");
+                                System.out.print("Pick error calculation method: ");
                                 this.mode = scanner.nextInt();
                                 scanner.nextLine();
                                 this.mode-=1; // adjust to switch case statements from other methods
@@ -641,12 +651,13 @@ public class QuadTreeImage extends ImageProcessing{
                         }
                         
                         if(start_compress || input_path || output_path || pick_mode || input_block_size){
-                                System.out.print("Start compression [y/n] ?");
+                                System.out.print("Start compression [y/n] ?: ");
                                 Boolean confirm = false;
                                 while(!confirm){
                                         String response = scanner.nextLine();
                                         if("y".equals(response) || "Y".equals(response)){
-                                                applyCompression();
+                                                boolean logResults = true;
+                                                applyCompression(logResults);
                                                 confirm = true;
                                         }
                                         else if("n".equals(response) || "N".equals(response)){
@@ -664,11 +675,12 @@ public class QuadTreeImage extends ImageProcessing{
                                 double expectedPercentage, tolerance;
                                 int max_iter;
                                 System.out.print("Input target compression percentage (optional): ");
-                                if(scanner.nextInt()==0){
+                                expectedPercentage = scanner.nextDouble();
+                                scanner.nextLine();
+                                if(expectedPercentage==0){
                                         System.out.println("Skipping the process...");
                                 }
                                 else {
-                                        expectedPercentage = scanner.nextDouble();
                                         System.out.print("Input tolerance for target: ");
                                         tolerance = scanner.nextDouble();
                                         scanner.nextLine();
@@ -686,21 +698,24 @@ public class QuadTreeImage extends ImageProcessing{
                         start_compress = false;
                         find_compress_percent = false;
 
-                        System.out.print("Do you want to exit the process [y/n] ?");
+                        System.out.print("Do you want to exit the process [y/n] ?: ");
                         String exitResponse = scanner.nextLine();
                         if ("y".equalsIgnoreCase(exitResponse)) {
                                 end_process = true;
+                                scanner.close();
                         }
                         else{
                                 // if not yes then we ask for which part of input
-                                System.out.println("Select what to do next: ");
                                 System.out.println("1. re-input absolute image path ");
                                 System.out.println("2. re-input absolute output path ");
                                 System.out.println("3. re-input error calculation mode ");
                                 System.out.println("4. re-input block size minimum ");
                                 System.out.println("5. repeat compression process ");
                                 System.out.println("6. compression with target percentage ");
-                                switch (scanner.nextInt()) {
+                                System.out.print("Select what to do next: ");
+                                int response;
+                                response = scanner.nextInt();
+                                switch (response) {
                                         case 1 -> input_path = true;
                                         case 2 -> output_path = true;
                                         case 3 -> pick_mode = true;

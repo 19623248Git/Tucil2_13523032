@@ -52,10 +52,11 @@ public class ImageProcessing {
 
 	// Method for user input absolute path
 	public void inputAbsPath(){
-		try (Scanner scanner = new Scanner(System.in)) {
-			System.out.print("Enter the absolute path of the image: ");
-			this.absPath = scanner.nextLine();
-		}
+
+		Scanner scanner = new Scanner(System.in);
+		System.out.print("Enter the absolute path of the image: ");
+		this.absPath = scanner.nextLine();
+
 
 		try{
 			loadImage(this.absPath);
